@@ -38,23 +38,25 @@ local function parse(map)
       value = Map.EMPTY
     elseif tile == "[]" then
       value = Map.TAVERN
-      table.insert(map.taverns, {pos={x=x, y=y}})
+      map.taverns[#map.taverns + 1] = {pos={x=x, y=y}}
     elseif string.sub(tile, 1, 1) == "$" then
       -- The tile number` is 0 for unclaimed or 1-4 for players
       -- This number is then added to the base of 5 for the tile value
       local owner = string.sub(tile, 2, 2)
       if owner == "-" then owner = 0 else owner = tonumber(owner) end
-      table.insert(map.mines, {pos={x=x, y=y}, owner=owner})
+      map.mines[#map.mines + 1] = {pos={x=x, y=y}, owner=owner}
       value = Map.MINE0 + owner
+    elseif string.sub(tile, 1, 1) == "@" then
+      value = tonumber(string.sub(tile, 2, 2))
     else
       value = Map.EMPTY
     end
 
     map.grid[y][x] = value
-    if value == Map.EMPTY or value == Map.PLAYER1 then
-      map.collision_map[y][x] = false
-    else
+    if value == Map.EMPTY or value == map.hero.id then
       map.collision_map[y][x] = true
+    else
+      map.collision_map[y][x] = false
     end
 
     if x < map.game.board.size then
@@ -105,7 +107,7 @@ end
 -- @param y Integer
 -- @return bool
 function Map:walkable(x, y)
-  return assert(self.collision_map[y][x], "Invalid tile location")
+  return self.collision_map[y][x]
 end
 
 -- Get the tile for the given grid position
@@ -113,7 +115,51 @@ end
 -- @param y Integer
 -- @return integer
 function Map:tile(x, y)
-  return assert(self.grid[y][x], "Invalid tile location")
+  return self.grid[y][x]
+end
+
+local function get_neighbors(map, cur)
+  local n = {}
+  if cur.x > 1 then n[#n + 1] = {x=cur.x - 1, y=cur.y} end
+  if cur.y < #map.grid then n[#n + 1] = {x=cur.x, y=cur.y + 1} end
+  if cur.x < #map.grid then n[#n + 1] = {x=cur.x + 1, y=cur.y} end
+  if cur.y > 1 then n[#n + 1] = {x=cur.x, y=cur.y - 1} end
+  return n
+end
+
+-- Calculate a path from an (X, Y) tuple to an (X, Y) tuple
+function Map:path(cur, to, path, visited)
+  path = path or {}
+  visited = visited or {}
+  if not visited[cur.y] then visited[cur.y] = {} end
+  -- Skip visited nodes
+  if visited[cur.y][cur.x] then return nil end
+  -- Mark as visited
+  visited[cur.y][cur.x] = true
+  path[#path + 1] = cur
+  if cur.x == to.x and cur.y == to.y then return path end
+  if self:walkable(cur.x, cur.y) then
+    -- Try adjacent nodes to build up a path
+    for i, n in pairs(get_neighbors(self, cur)) do
+      local p = self:path(n, to, path, visited)
+      if p then return p end
+    end
+  end
+  -- Remove the dead-end node from the path
+  path[#path] = nil
+end
+
+-- Return the next move of the hero based on a path iterator
+-- @param dx Destination x position
+-- @param dy Destination y position
+-- @return string|nil
+function Map:move_to(dx, dy)
+  path = self:path({x=self.hero.pos.x, y=self.hero.pos.y}, {x=dx, y=dy})
+  if not path or #path == 1 then return nil end
+  if path[2].x < self.hero.pos.x then return "West" end
+  if path[2].x > self.hero.pos.x then return "East" end
+  if path[2].y < self.hero.pos.y then return "North" end
+  if path[2].y > self.hero.pos.y then return "South" end
 end
 
 return Map
