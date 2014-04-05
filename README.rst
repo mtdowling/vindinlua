@@ -44,18 +44,24 @@ Requires Lua 5.1 or greater and the dkjson library.
 
 	luarocks install dkjson
 
-Using the Map Table
-===================
+Using the Map
+=============
 
 The game loop is supplied a map table that provides a list of players, mines,
 taverns, a collision map, and the tiles of the game. For debugging purposes,
 the map can be cast to a string (as seen in the example above).
 
-map.tile(x, y)
+map:tile(x, y)
     Returns the tile value for the given grid position.
 
-map.walkable(x, y)
+map:walkable(x, y)
     Returns true if the given grid position is walkable.
+
+map:move_to(dx, dy)
+    When given a destination X and Y, the map will perform a BFS to find a
+    path to the given position from the player's current X and Y position.
+    If a path is found, one of "North", "South", "East", or "West" is
+    returned. If no path can be found, the function returns ``nil``.
 
 map.players
     Contains a sequence table of players. Each element contains a hash of data
