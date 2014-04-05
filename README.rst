@@ -2,6 +2,9 @@
 Vindinium Starter Kit for Lua
 =============================
 
+Provides a Lua starter kit for `Vindinium <http://vindinium.org>`_, allowing
+you to easily create an AI bot to compete against other bots.
+
 Usage
 =====
 
