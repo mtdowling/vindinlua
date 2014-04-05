@@ -155,11 +155,15 @@ end
 -- @return string|nil
 function Map:move_to(dx, dy)
   path = self:path({x=self.hero.pos.x, y=self.hero.pos.y}, {x=dx, y=dy})
+  return self:first_in_path(path)
+end
+
+function Map:first_in_path(path)
   if not path or #path == 1 then return nil end
   if path[2].x < self.hero.pos.x then return "West" end
-  if path[2].x > self.hero.pos.x then return "East" end
   if path[2].y < self.hero.pos.y then return "North" end
   if path[2].y > self.hero.pos.y then return "South" end
+  if path[2].x > self.hero.pos.x then return "East" end
 end
 
 return Map
