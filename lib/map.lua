@@ -137,9 +137,11 @@ function Map:path(cur, to, path, visited)
   -- Mark as visited
   visited[cur.y][cur.x] = true
   path[#path + 1] = cur
-  if cur.x == to.x and cur.y == to.y then return path end
+  if cur.x == to.x and cur.y == to.y then
+    return path
+  end
   if self:walkable(cur.x, cur.y) then
-    -- Try adjacent nodes to build up a path
+    -- Try adjacent nodes to try to find the shortest path
     for i, n in pairs(get_neighbors(self, cur)) do
       local p = self:path(n, to, path, visited)
       if p then return p end
@@ -154,16 +156,19 @@ end
 -- @param dy Destination y position
 -- @return string|nil
 function Map:move_to(dx, dy)
-  path = self:path({x=self.hero.pos.x, y=self.hero.pos.y}, {x=dx, y=dy})
-  return self:first_in_path(path)
+  return self:move(self:path(self.hero.pos, {x=dx, y=dy}))
 end
 
-function Map:first_in_path(path)
-  if not path or #path == 1 then return nil end
-  if path[2].x < self.hero.pos.x then return "West" end
-  if path[2].y < self.hero.pos.y then return "North" end
-  if path[2].y > self.hero.pos.y then return "South" end
-  if path[2].x > self.hero.pos.x then return "East" end
+-- Returns the next move for a player using the given path and
+-- removed the top path entry from the path.
+function Map:move(path)
+  if not path or #path == 0 then return nil end
+  local pos = table.remove(path, 1)
+  if pos.x < self.hero.pos.x then return "West" end
+  if pos.y < self.hero.pos.y then return "North" end
+  if pos.y > self.hero.pos.y then return "South" end
+  if pos.x > self.hero.pos.x then return "East" end
+  return self:move(path)
 end
 
 return Map
