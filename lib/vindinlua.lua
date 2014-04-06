@@ -15,7 +15,7 @@ local game_modes = {
 }
 
 -- Valid directions for input
-local valid_moves= {
+local valid_moves = {
   Stay  = true,
   North = true,
   South = true,
