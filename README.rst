@@ -156,8 +156,8 @@ Tile functions
     Returns true if the tile is the playable hero.
 
 ``tile:isMine()``
-    Returns a number -1 or 1 to 4 if the tile is a mine, where the number
-    represents the mine owner (-1 being unowned). If the tile is not a mine,
+    Returns a number 0-4 if the tile is a mine, where the number
+    represents the mine owner (0 being unowned). If the tile is not a mine,
     returns false.
 
 ``tile:isTavern()``

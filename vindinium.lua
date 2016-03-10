@@ -59,11 +59,11 @@ Tile.new = function (id, heroId)
   return tile
 end
 
---- Returns a number -1, or 1-4 if the tile is a mine where -1 represents an
+--- Returns a number 0-4 if the tile is a mine where 0 represents an
 -- unclaimed mine. Returns false if the tile is not a mine.
 function Tile:isMine()
   if self.id >= Map.TILE.MINE_0 and self.id <= Map.TILE.MINE_4 then
-    return (self.id - Map.TILE.MINE_0) - 1
+    return self.id - Map.TILE.MINE_0
   else
     return false
   end
